@@ -25,7 +25,7 @@ const people = [
   ['Noah', 'Fischer', 'hacker', 'UCF', ['Java', 'Spring Boot', 'PostgreSQL'], 'A backend-heavy project'],
   ['Zara', 'Ahmed', 'hacker', 'USF', ['Next.js', 'Tailwind', 'Vercel'], 'A fast-moving web team'],
   ['Carlos', 'Mendez', 'mentor', 'Siemens Energy', ['IoT', 'Python', 'MQTT'], 'Hardware and IoT teams'],
-  ['Emily', 'Nguyen', 'hacker', 'UCF', ['Machine learning', 'TensorFlow', 'Python'], 'An AI for social good idea'],
+  ['Emily', 'Nguyen', 'hacker', 'UCF', ['Machine learning', 'TensorFlow', 'Python'], 'A social good project'],
   ['Ryan', "O'Connor", 'hacker', 'UCF', ['Blender', '3D modeling', 'Three.js'], 'A creative or AR project'],
   ['Fatima', 'Rahman', 'hacker', 'UCF', ['Kotlin', 'Android', 'Jetpack Compose'], 'An Android app team'],
   ['Benjamin', 'Cohen', 'hacker', 'UF', ['Solidity', 'Web3', 'TypeScript'], 'A blockchain hack'],
