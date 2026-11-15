@@ -97,10 +97,10 @@ Requirements: Node.js 20 or newer, a MongoDB connection string (Atlas free tier 
    ```
    cd mobile
    flutter pub get
-   flutter run --dart-define=API_URL=https://hackmatch.vercel.app
+   flutter run --dart-define=API_URL=https://hackmatch-ucf.vercel.app
    ```
 
-   To build an installable APK: `flutter build apk --release --dart-define=API_URL=https://hackmatch.vercel.app`
+   To build an installable APK: `flutter build apk --release --dart-define=API_URL=https://hackmatch-ucf.vercel.app`
 
 ## Tests
 
