@@ -31,6 +31,7 @@ body {
   --bs-btn-hover-bg: var(--brand-dark);
   --bs-btn-hover-border-color: var(--brand-dark);
   --bs-btn-active-bg: var(--brand-dark);
+  --bs-btn-disabled-color: #fff;
   --bs-btn-disabled-bg: var(--brand);
   --bs-btn-disabled-border-color: var(--brand);
   font-weight: 600;
@@ -101,4 +102,8 @@ body {
 
 .badge-mentor {
   background: #92400e;
+}
+
+.card {
+  --bs-card-bg: #fff;
 }
