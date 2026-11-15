@@ -56,30 +56,43 @@ const people = [
   ['Naomi', 'Clarke', 'hacker', 'UCF', ['Technical writing', 'Docs', 'Markdown'], 'A team that needs a README hero'],
 ];
 
+// Upserts by email, so running it again (for example on every deploy)
+// updates the sample people in place and keeps their ids. That way real
+// users' shortlist entries that point at them stay valid.
 async function seed() {
   await connectDb();
   // Seeded people get a random password nobody knows, so they can't log in.
   const passwordHash = await bcrypt.hash(crypto.randomBytes(24).toString('hex'), 12);
 
-  await User.deleteMany({ email: { $regex: `@${SEED_DOMAIN.replace(/\./g, '\\.')}$` } });
-  await User.insertMany(
+  await User.bulkWrite(
     people.map(([firstName, lastName, role, school, skills, lookingFor]) => ({
-      email: `${firstName}.${lastName}`.toLowerCase().replace(/[^a-z.]/g, '') + `@${SEED_DOMAIN}`,
-      passwordHash,
-      firstName,
-      lastName,
-      role,
-      school,
-      skills,
-      lookingFor,
-      bio: `${role === 'mentor' ? 'Mentoring' : 'Hacking'} at Knight Hacks. Ask me about ${skills[0]}.`,
-      isVerified: true,
+      updateOne: {
+        filter: { email: `${firstName}.${lastName}`.toLowerCase().replace(/[^a-z.]/g, '') + `@${SEED_DOMAIN}` },
+        update: {
+          $set: {
+            firstName,
+            lastName,
+            role,
+            school,
+            skills,
+            lookingFor,
+            bio: `${role === 'mentor' ? 'Mentoring' : 'Hacking'} at Knight Hacks. Ask me about ${skills[0]}.`,
+            isVerified: true,
+          },
+          $setOnInsert: { passwordHash },
+        },
+        upsert: true,
+      },
     }))
   );
   console.log(`Seeded ${people.length} attendees`);
 }
 
 if (require.main === module) {
+  if (!process.env.MONGODB_URI && process.env.VERCEL) {
+    console.log('MONGODB_URI is not set; skipping seed');
+    process.exit(0);
+  }
   seed()
     .catch((err) => {
       console.error(err);
