@@ -1,0 +1,59 @@
+@startuml activity-registration
+skinparam shadowing false
+skinparam ActivityBackgroundColor #E8EDF9
+skinparam ActivityBorderColor #1E3A8A
+skinparam SwimlaneTitleFontStyle bold
+
+|User|
+start
+:Open HackMatch;
+:Fill in name, email, password;
+|Client (web or mobile)|
+if (Passwords match?) then (no)
+  :Show "Passwords do not match";
+  stop
+else (yes)
+  :POST /api/auth/register;
+endif
+|API (Express)|
+if (Input valid and email unused?) then (no)
+  :Return 400 or 409 with message;
+  |Client (web or mobile)|
+  :Show error next to form;
+  stop
+else (yes)
+  |API (Express)|
+  :Hash password with bcrypt;
+  :Save unverified User;
+  :Create 64-char token, store SHA-256 hash (24 h TTL);
+  :Send verification email (Nodemailer);
+endif
+|User|
+:Open link from inbox;
+|Client (web or mobile)|
+:POST /api/auth/verify-email;
+|API (Express)|
+if (Token hash found and not expired?) then (no)
+  :Return 400;
+  |Client (web or mobile)|
+  :Offer to resend link;
+  stop
+else (yes)
+  |API (Express)|
+  :Delete token (single use);
+  :Mark user verified;
+endif
+|User|
+:Log in with email and password;
+|API (Express)|
+if (Password matches and verified?) then (yes)
+  :Sign JWT (7 days);
+  |Client (web or mobile)|
+  :Save token, open Search;
+  stop
+else (no)
+  |Client (web or mobile)|
+  :Show 401 or "Verify your email";
+  stop
+endif
+@enduml

@@ -1,0 +1,147 @@
+@startuml class-mobile
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1E3A8A
+  HeaderBackgroundColor #E8EDF9
+}
+
+package "lib" {
+  class HackMatchApp <<StatefulWidget>> {
+    + api : ApiClient
+  }
+  class _HackMatchAppState {
+    - _user : CurrentUser?
+    - _starting : bool
+    - _restoreSession() : Future<void>
+    - _logout() : Future<void>
+    + build(context) : Widget
+  }
+
+  class ApiClient {
+    + baseUrl : String
+    - _http : http.Client
+    - _token : String?
+    + isLoggedIn : bool
+    + loadToken() : Future<void>
+    + register(email, password, firstName, lastName) : Future<String>
+    + login(email, password) : Future<CurrentUser>
+    + logout() : Future<void>
+    + resendVerification(email) : Future<String>
+    + forgotPassword(email) : Future<String>
+    + me() : Future<CurrentUser>
+    + updateMe(changes) : Future<CurrentUser>
+    + search(query, role) : Future<SearchPage>
+    + shortlist() : Future<List<ShortlistEntry>>
+    + addToShortlist(memberId, note) : Future<ShortlistEntry>
+    + updateShortlistEntry(id, note, status) : Future<ShortlistEntry>
+    + removeFromShortlist(id) : Future<void>
+    - _send(method, path, body) : Future<dynamic>
+    - _saveToken(token) : Future<void>
+  }
+
+  class ApiException {
+    + status : int
+    + message : String
+  }
+
+  class Attendee {
+    + id : String
+    + firstName : String
+    + lastName : String
+    + role : String
+    + school : String
+    + skills : List<String>
+    + lookingFor : String
+    + bio : String
+    + fullName : String
+    + initials : String
+    + isMentor : bool
+    + {static} fromJson(json) : Attendee
+  }
+  class CurrentUser {
+    + email : String
+    + {static} fromJson(json) : CurrentUser
+  }
+  class ShortlistEntry {
+    + id : String
+    + note : String
+    + status : String
+    + member : Attendee
+    + {static} fromJson(json) : ShortlistEntry
+  }
+  class SearchPage {
+    + results : List<Attendee>
+    + total : int
+  }
+}
+
+package "lib/screens" {
+  class LoginScreen <<StatefulWidget>> {
+    + onLoggedIn : ValueChanged<CurrentUser>
+    - _login() : Future<void>
+    - _resend() : Future<void>
+  }
+  class RegisterScreen <<StatefulWidget>> {
+    - _register() : Future<void>
+  }
+  class ForgotPasswordScreen <<StatefulWidget>> {
+    - _send() : Future<void>
+  }
+  class HomeScreen <<StatefulWidget>> {
+    - _tab : int
+  }
+  class SearchScreen <<StatefulWidget>> {
+    - _role : String
+    - _results : List<Attendee>
+    - _onQueryChanged(text) : void
+    - _search() : Future<void>
+    - _add(person) : Future<void>
+  }
+  class ShortlistScreen <<StatefulWidget>> {
+    - _entries : List<ShortlistEntry>
+    - _load() : Future<void>
+    - _edit(entry) : Future<void>
+    - _remove(entry) : Future<void>
+  }
+  class ProfileScreen <<StatefulWidget>> {
+    + user : CurrentUser
+    - _save() : Future<void>
+  }
+  class AuthScaffold <<StatelessWidget>>
+}
+
+package "lib/widgets" {
+  class AttendeeCard <<StatelessWidget>> {
+    + person : Attendee
+    + footer : Widget?
+  }
+}
+
+HackMatchApp *-- "1" _HackMatchAppState
+HackMatchApp o-- "1" ApiClient
+_HackMatchAppState ..> LoginScreen : shows
+_HackMatchAppState ..> HomeScreen : shows
+LoginScreen ..> RegisterScreen : navigates
+LoginScreen ..> ForgotPasswordScreen : navigates
+LoginScreen ..> AuthScaffold
+RegisterScreen ..> AuthScaffold
+ForgotPasswordScreen ..> AuthScaffold
+HomeScreen *-- "1" SearchScreen
+HomeScreen *-- "1" ShortlistScreen
+HomeScreen *-- "1" ProfileScreen
+SearchScreen --> "1" ApiClient
+ShortlistScreen --> "1" ApiClient
+ProfileScreen --> "1" ApiClient
+LoginScreen --> "1" ApiClient
+SearchScreen ..> AttendeeCard
+ShortlistScreen ..> AttendeeCard
+AttendeeCard --> "1" Attendee
+Attendee <|-- CurrentUser
+ShortlistEntry *-- "1" Attendee : member
+SearchPage o-- "0..*" Attendee
+ApiClient ..> ApiException : throws
+ApiClient ..> SearchPage : creates
+ApiClient ..> ShortlistEntry : creates
+@enduml

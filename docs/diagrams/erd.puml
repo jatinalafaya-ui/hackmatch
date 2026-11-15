@@ -1,0 +1,53 @@
+@startuml erd
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1E3A8A
+  HeaderBackgroundColor #E8EDF9
+}
+
+entity "users" as users {
+  * _id : ObjectId <<PK>>
+  --
+  * email : String <<unique, lowercase>>
+  * passwordHash : String (bcrypt)
+  * firstName : String
+  * lastName : String
+  role : String {hacker, mentor}
+  school : String
+  skills : String[]
+  lookingFor : String
+  bio : String
+  * isVerified : Boolean
+  createdAt : Date
+  updatedAt : Date
+}
+
+entity "authtokens" as tokens {
+  * _id : ObjectId <<PK>>
+  --
+  * user : ObjectId <<FK users._id>>
+  * purpose : String {verify, reset}
+  * tokenHash : String <<unique>> (SHA-256)
+  * expiresAt : Date <<TTL index>>
+}
+
+entity "shortlistentries" as shortlist {
+  * _id : ObjectId <<PK>>
+  --
+  * owner : ObjectId <<FK users._id>>
+  * member : ObjectId <<FK users._id>>
+  note : String
+  status : String {interested, contacted, teamed}
+  createdAt : Date
+  updatedAt : Date
+  ..
+  unique (owner, member)
+}
+
+users ||--o{ tokens : "has pending"
+users ||--o{ shortlist : "owns"
+users ||--o{ shortlist : "appears as member in"
+@enduml

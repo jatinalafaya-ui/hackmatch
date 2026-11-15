@@ -1,0 +1,47 @@
+@startuml use-case
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #E8EDF9
+  BorderColor #1E3A8A
+}
+skinparam actorBorderColor #1E3A8A
+
+actor "Visitor" as Visitor
+actor "Attendee" as Attendee
+actor "Email service" as Mail <<system>>
+Visitor <|-- Attendee
+
+rectangle "HackMatch (web and mobile)" {
+  usecase "Create account" as UC_Register
+  usecase "Verify email" as UC_Verify
+  usecase "Log in" as UC_Login
+  usecase "Reset forgotten password" as UC_Reset
+  usecase "Search attendees and mentors" as UC_Search
+  usecase "Filter by role" as UC_Filter
+  usecase "Manage my shortlist" as UC_Shortlist
+  usecase "Add person to shortlist" as UC_Add
+  usecase "Update status and note" as UC_Update
+  usecase "Remove from shortlist" as UC_Remove
+  usecase "Edit my profile" as UC_Profile
+  usecase "Log out" as UC_Logout
+}
+
+Visitor --> UC_Register
+Visitor --> UC_Login
+Visitor --> UC_Reset
+UC_Register ..> UC_Verify : <<include>>
+UC_Register --> Mail
+UC_Reset --> Mail
+
+Attendee --> UC_Search
+Attendee --> UC_Shortlist
+Attendee --> UC_Profile
+Attendee --> UC_Logout
+UC_Filter .> UC_Search : <<extend>>
+UC_Shortlist <.. UC_Add : <<extend>>
+UC_Shortlist <.. UC_Update : <<extend>>
+UC_Shortlist <.. UC_Remove : <<extend>>
+UC_Add .> UC_Search : <<include>>
+@enduml

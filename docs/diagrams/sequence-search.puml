@@ -1,0 +1,42 @@
+@startuml sequence-search
+skinparam shadowing false
+skinparam sequenceParticipantBackgroundColor #E8EDF9
+skinparam sequenceParticipantBorderColor #1E3A8A
+autonumber
+
+actor Attendee
+participant "SearchScreen\n(Flutter) / Search page (React)" as UI
+participant "ApiClient" as Client
+participant "Express router\n/api/attendees" as API
+participant "requireAuth" as Auth
+database "MongoDB Atlas\nusers" as DB
+
+Attendee -> UI : types "rea"
+UI -> UI : wait 250-300 ms (debounce)
+UI -> Client : search("rea", role)
+Client -> API : GET /api/attendees/search?q=rea\nAuthorization: Bearer <JWT>
+API -> Auth : verify JWT
+Auth -> DB : findById(sub)
+DB --> Auth : user (verified)
+Auth --> API : req.user
+API -> API : escape regex, build $or on name,\nschool, skills, lookingFor (case-insensitive)
+API -> DB : countDocuments(filter) and find(filter)\n.sort().skip().limit(20)
+DB --> API : matching users
+API --> Client : 200 { results, total, page, pageSize }
+Client --> UI : SearchPage
+UI --> Attendee : cards for Andrea Lopez, Leah Goldberg, ...
+
+Attendee -> UI : tap "Add to shortlist"
+UI -> Client : addToShortlist(memberId)
+Client -> API : POST /api/shortlist { memberId }
+API -> DB : insert ShortlistEntry(owner = req.user)
+alt already on shortlist
+  DB --> API : duplicate key
+  API --> Client : 409 "already on your shortlist"
+else new entry
+  DB --> API : entry
+  API --> Client : 201 { entry }
+end
+Client --> UI : result
+UI --> Attendee : "Added to your shortlist"
+@enduml
