@@ -14,7 +14,7 @@ async function connectDb(uri = config.mongoUri) {
   }
   if (!connecting) {
     connecting = mongoose
-      .connect(uri, { serverSelectionTimeoutMS: 10000 })
+      .connect(uri, { dbName: config.mongoDbName, serverSelectionTimeoutMS: 10000 })
       .catch((err) => {
         connecting = null;
         throw err;
